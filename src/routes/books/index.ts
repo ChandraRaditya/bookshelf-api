@@ -1,10 +1,11 @@
-const { getAllBooks } = require('../../handler/books');
+import { ServerRoute, ReqRefDefaults } from '@hapi/hapi';
+import { getAllBooksHandler } from '../../handler/books';
 
-const bookRoutes = [
+const bookRoutes: ServerRoute<ReqRefDefaults>[] = [
   {
     method: 'GET',
     path: '/books',
-    handler: getAllBooks,
+    handler: getAllBooksHandler,
   },
   {
     method: 'GET',
@@ -28,4 +29,4 @@ const bookRoutes = [
   },
 ];
 
-module.exports = bookRoutes;
+export default bookRoutes;
