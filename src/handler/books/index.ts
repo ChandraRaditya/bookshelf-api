@@ -8,7 +8,7 @@ import books from '../../data';
 
 const getAllBooksHandler = (
   request: Request<ReqRefDefaults>,
-  h: ResponseToolkit<ReqRefDefaults>
+  h: ResponseToolkit<ReqRefDefaults>,
 ): ResponseObject => {
   const response = h.response({
     status: 'success',
