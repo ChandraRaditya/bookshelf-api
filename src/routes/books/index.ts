@@ -1,5 +1,9 @@
 import { ServerRoute, ReqRefDefaults } from '@hapi/hapi';
-import { getAllBooksHandler, getBookByIdHandler } from '../../handler/books';
+import {
+  addBookHandler,
+  getAllBooksHandler,
+  getBookByIdHandler,
+} from '../../handler/books';
 
 const bookRoutes: ServerRoute<ReqRefDefaults>[] = [
   {
@@ -15,7 +19,7 @@ const bookRoutes: ServerRoute<ReqRefDefaults>[] = [
   {
     method: 'POST',
     path: '/books',
-    handler: () => {},
+    handler: addBookHandler,
   },
   {
     method: 'PUT',

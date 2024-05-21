@@ -12,3 +12,6 @@ export interface IBooks {
   insertedAt: string;
   updatedAt: string;
 }
+
+export interface IBookPayload
+  extends Omit<IBooks, 'id' | 'insertedAt' | 'updatedAt'> {}
