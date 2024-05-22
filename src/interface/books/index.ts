@@ -16,6 +16,6 @@ export interface IBooks {
 export interface IBookPayload
   extends Omit<IBooks, 'id' | 'insertedAt' | 'updatedAt'> {}
 
-export interface IParams<T> {
+export interface IBookParams<T> {
   params: T;
 }

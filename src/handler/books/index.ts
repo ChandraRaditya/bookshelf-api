@@ -6,7 +6,7 @@ import {
 } from '@hapi/hapi';
 import { nanoid } from 'nanoid';
 import books from '../../data';
-import { IBookPayload, IParams } from '../../interface/books';
+import { IBookParams, IBookPayload } from '../../interface/books';
 
 const getAllBooksHandler = (
   request: Request<ReqRefDefaults>,
@@ -24,7 +24,7 @@ const getBookByIdHandler = (
   request: Request<ReqRefDefaults>,
   h: ResponseToolkit<ReqRefDefaults>,
 ): ResponseObject => {
-  const { id } = request.params as IParams<{ id: string }>['params'];
+  const { id } = request.params as IBookParams<{ id: string }>['params'];
   const filteredBooksById = books.filter((data) => data.id === id)[0];
 
   if (filteredBooksById !== undefined) {
@@ -118,16 +118,14 @@ const eidtBookHandler = (
     reading,
   } = request.payload as IBookPayload;
 
-  const { bookId } = request.params as IParams<{ bookId: string }>['params'];
+  const { bookId } = request.params as IBookParams<{
+    bookId: string;
+  }>['params'];
   const insertedAt = new Date().toDateString();
   const updatedAt = insertedAt;
   const finished = pageCount === readPage;
 
   const findIndex = books.findIndex((book) => book.id === bookId);
-
-  console.log('ini findIndex', findIndex, bookId);
-  console.log('ini name', name);
-  console.log('ini readPage dan pageCount', readPage, pageCount);
 
   if (!name) {
     const response = h.response({
@@ -183,9 +181,39 @@ const eidtBookHandler = (
   return response;
 };
 
+const deleteBookHandler = (
+  request: Request<ReqRefDefaults>,
+  h: ResponseToolkit<ReqRefDefaults>,
+): ResponseObject => {
+  const { bookId } = request.params as IBookParams<{
+    bookId: string;
+  }>['params'];
+
+  const findIndex = books.findIndex((book) => book.id === bookId);
+
+  if (findIndex !== -1) {
+    books.splice(findIndex, 1);
+    const response = h.response({
+      status: 'success',
+      message: 'Buku berhasil dihapus',
+    });
+
+    response.code(200);
+    return response;
+  }
+
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku gagal dihapus. Id tidak ditemukan',
+  });
+  response.code(200);
+  return response;
+};
+
 export {
   getAllBooksHandler,
   getBookByIdHandler,
   addBookHandler,
   eidtBookHandler,
+  deleteBookHandler,
 };
