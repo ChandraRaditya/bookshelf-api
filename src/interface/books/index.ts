@@ -1,5 +1,5 @@
 export interface IBooks {
-  id: string;
+  id?: string;
   name: string;
   year: number;
   author: string;
@@ -15,3 +15,7 @@ export interface IBooks {
 
 export interface IBookPayload
   extends Omit<IBooks, 'id' | 'insertedAt' | 'updatedAt'> {}
+
+export interface IParams<T> {
+  params: T;
+}
