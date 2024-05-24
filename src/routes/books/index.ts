@@ -2,7 +2,7 @@ import { ServerRoute, ReqRefDefaults } from '@hapi/hapi';
 import {
   addBookHandler,
   deleteBookHandler,
-  eidtBookHandler,
+  editBookHandler,
   getAllBooksHandler,
   getBookByIdHandler,
 } from '../../handler/books';
@@ -26,7 +26,7 @@ const bookRoutes: ServerRoute<ReqRefDefaults>[] = [
   {
     method: 'PUT',
     path: '/books/{bookId}',
-    handler: eidtBookHandler,
+    handler: editBookHandler,
   },
   {
     method: 'DELETE',

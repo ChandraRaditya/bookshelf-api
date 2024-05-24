@@ -19,3 +19,7 @@ export interface IBookPayload
 export interface IBookParams<T> {
   params: T;
 }
+
+export interface IBookQueryParams<T> {
+  params: T;
+}

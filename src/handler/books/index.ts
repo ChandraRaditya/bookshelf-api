@@ -6,15 +6,54 @@ import {
 } from '@hapi/hapi';
 import { nanoid } from 'nanoid';
 import books from '../../data';
-import { IBookParams, IBookPayload } from '../../interface/books';
+import {
+  IBookParams,
+  IBookPayload,
+  IBookQueryParams,
+} from '../../interface/books';
 
 const getAllBooksHandler = (
   request: Request<ReqRefDefaults>,
   h: ResponseToolkit<ReqRefDefaults>,
 ): ResponseObject => {
+  const { name, reading, finished } = request.query as IBookQueryParams<{
+    name?: string;
+    reading?: 0 | 1;
+    finished?: 0 | 1;
+  }>['params'];
+
+  let filteredBooks = books;
+
+  if (name) {
+    filteredBooks = filteredBooks.filter(
+      (book) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        book.name && book.name.toLowerCase().includes(name.toLowerCase()),
+      // eslint-disable-next-line function-paren-newline
+    );
+  }
+
+  if (typeof reading !== 'undefined') {
+    filteredBooks = filteredBooks.filter(
+      (book) => book.reading && book.reading === Boolean(reading),
+    );
+  }
+
+  if (typeof finished !== 'undefined') {
+    filteredBooks = filteredBooks.filter(
+      (book) => book.finished && book.finished === Boolean(finished),
+    );
+  }
+
   const response = h.response({
     status: 'success',
-    data: books,
+    data: {
+      books: filteredBooks.map((book) => ({
+        id: book.id || '',
+        name: book.name || '',
+        publisher: book.publisher || '',
+      })),
+    },
   });
   response.code(200);
   return response;
@@ -82,6 +121,27 @@ const addBookHandler = (
 
   const isSuccess = books.filter((book) => book.id === id).length > 0;
 
+  if (!name) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. Mohon isi nama buku',
+    });
+
+    response.code(400);
+    return response;
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message:
+        'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+
+    response.code(400);
+    return response;
+  }
+
   if (isSuccess) {
     const response = h.response({
       status: 'success',
@@ -103,7 +163,7 @@ const addBookHandler = (
   return response;
 };
 
-const eidtBookHandler = (
+const editBookHandler = (
   request: Request<ReqRefDefaults>,
   h: ResponseToolkit<ReqRefDefaults>,
 ): ResponseObject => {
@@ -137,7 +197,7 @@ const eidtBookHandler = (
     return response;
   }
 
-  if (readPage >= pageCount) {
+  if (readPage > pageCount) {
     const response = h.response({
       status: 'fail',
       message:
@@ -214,6 +274,6 @@ export {
   getAllBooksHandler,
   getBookByIdHandler,
   addBookHandler,
-  eidtBookHandler,
+  editBookHandler,
   deleteBookHandler,
 };
