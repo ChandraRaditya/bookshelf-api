@@ -19,7 +19,7 @@ const getAllBooksHandler = (
   const { name, reading, finished } = request.query as IBookQueryParams<{
     name?: string;
     reading?: 0 | 1;
-    finished?: 0 | 1;
+    finished?: '0' | '1';
   }>['params'];
 
   let filteredBooks = books;
@@ -35,13 +35,13 @@ const getAllBooksHandler = (
 
   if (typeof reading !== 'undefined') {
     filteredBooks = filteredBooks.filter(
-      (book) => book.reading && book.reading === Boolean(reading),
+      (book) => book.reading === Boolean(reading),
     );
   }
 
   if (typeof finished !== 'undefined') {
     filteredBooks = filteredBooks.filter(
-      (book) => book.finished && book.finished === Boolean(finished),
+      (book) => book.finished === Boolean(Number(finished)),
     );
   }
 
@@ -69,7 +69,9 @@ const getBookByIdHandler = (
   if (filteredBooksById !== undefined) {
     const response = h.response({
       status: 'success',
-      data: filteredBooksById,
+      data: {
+        book: filteredBooksById,
+      },
     });
     response.code(200);
     return response;
@@ -78,7 +80,7 @@ const getBookByIdHandler = (
     status: 'fail',
     message: 'Buku tidak ditemukan',
   });
-  response.code(400);
+  response.code(404);
   return response;
 };
 
@@ -96,6 +98,27 @@ const addBookHandler = (
     readPage,
     reading,
   } = request.payload as IBookPayload;
+
+  if (!name) {
+    const response = h.response({
+      status: 'fail',
+      message: 'Gagal menambahkan buku. Mohon isi nama buku',
+    });
+
+    response.code(400);
+    return response;
+  }
+
+  if (readPage > pageCount) {
+    const response = h.response({
+      status: 'fail',
+      message:
+        'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
+    });
+
+    response.code(400);
+    return response;
+  }
 
   const id = nanoid(16);
   const insertedAt = new Date().toDateString();
@@ -120,27 +143,6 @@ const addBookHandler = (
   books.push(newBook);
 
   const isSuccess = books.filter((book) => book.id === id).length > 0;
-
-  if (!name) {
-    const response = h.response({
-      status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku',
-    });
-
-    response.code(400);
-    return response;
-  }
-
-  if (readPage > pageCount) {
-    const response = h.response({
-      status: 'fail',
-      message:
-        'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
-    });
-
-    response.code(400);
-    return response;
-  }
 
   if (isSuccess) {
     const response = h.response({
@@ -178,19 +180,10 @@ const editBookHandler = (
     reading,
   } = request.payload as IBookPayload;
 
-  const { bookId } = request.params as IBookParams<{
-    bookId: string;
-  }>['params'];
-  const insertedAt = new Date().toDateString();
-  const updatedAt = insertedAt;
-  const finished = pageCount === readPage;
-
-  const findIndex = books.findIndex((book) => book.id === bookId);
-
   if (!name) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku',
     });
 
     response.code(400);
@@ -207,6 +200,15 @@ const editBookHandler = (
     response.code(400);
     return response;
   }
+
+  const { bookId } = request.params as IBookParams<{
+    bookId: string;
+  }>['params'];
+  const insertedAt = new Date().toDateString();
+  const updatedAt = insertedAt;
+  const finished = pageCount === readPage;
+
+  const findIndex = books.findIndex((book) => book.id === bookId);
 
   if (findIndex !== -1) {
     books[findIndex] = {
@@ -234,7 +236,7 @@ const editBookHandler = (
 
   const response = h.response({
     status: 'fail',
-    message: 'Gagal memperbarui buku. Id tidak ditemukam',
+    message: 'Gagal memperbarui buku. Id tidak ditemukan',
   });
 
   response.code(404);
@@ -266,7 +268,7 @@ const deleteBookHandler = (
     status: 'fail',
     message: 'Buku gagal dihapus. Id tidak ditemukan',
   });
-  response.code(200);
+  response.code(404);
   return response;
 };
 
